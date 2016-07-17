@@ -113,6 +113,29 @@ class Question(object):
         self.question = question
         self.correct_answer = str(correct_answer)
 
+    def ask_and_evaluate(self):
+        """Given a question, prints it and checks the student's response.
+
+        >q1 = Question("What's the airspeed velocity of an unladen swallow?", "African or European?")
+        >q1.ask_and_evaluate()
+        What's the airspeed velocity of an unladen swallow?
+         > African or European?
+        True
+
+        ***NOTE: In testing above, I was able to enter a response in bpython and have
+           it work. But just running "python assessment.py" did not pull my response
+           into the text shown after "Got:". Purposely formatting the doctest
+           incorrectly so it won't run.***
+
+        """
+        print self.question
+        student_response = raw_input(" > ")
+
+        if student_response == self.correct_answer:
+            return True
+        else:
+            return False
+
 
 class Exam(object):
     """A class that creates an exam.
@@ -162,7 +185,32 @@ class Exam(object):
         # Appends that Question to self.questions
         self.questions.append(new_question)
 
+    def administer(self):
+        """Takes the instance's list of questions and administers them. Returns
+        the student's final score.
 
+        Updates the student's score question-by-question, rathen than grading the
+        whole test at the end. Correct responses are worth 1 point. Incorrect
+        responses are worth -1 point.
+        """
+
+        # Initialize score to 0, since the student hasn't sat the exam yet.
+        score = 0
+
+        # Iterate over the list of questions.
+        for question in self.questions:
+
+            # Get response and store the status of its correctness.
+            response_marked_correct = question.ask_and_evaluate()
+
+            # If the response was marked correct, increment score. Else,
+            # decrement it.
+            if response_marked_correct:
+                score = score + 1
+            else:
+                score = score - 1
+
+        return score
 
 ######################################################################
 if __name__ == "__main__":
