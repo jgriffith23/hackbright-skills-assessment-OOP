@@ -62,4 +62,112 @@ Part 1: Discussion
 # Create your classes and class methods
 
 class Student(object):
-    
+    """A class to store student information, including first/last name and address.
+
+    Instantiating this class requires three parameters:
+
+    first_name: a string representing the student's first name
+    last_name: a string representing the student's last name
+    address: a string representing the student's address
+
+    >>> mary = Student("mary","middle","123 456th St")
+    >>> mary.first_name
+    'mary'
+    >>> mary.last_name
+    'middle'
+    >>> mary.address
+    '123 456th St'
+    """
+
+    # Contsructor method
+    def __init__(self, first_name, last_name, address):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.address = address
+
+
+class Question(object):
+    """A class to store questions and their correct answers.
+
+    Instantiating this class takes two parameters:
+    question: A string containing the question's full text.
+    correct_answer: The response you expect a student to give to the question. If
+                    a number is given, it will be converted into a string.
+
+    >>> question1 = Question("Who gave the Gettysburg Address?", "Abraham Lincoln")
+    >>> question1.question
+    'Who gave the Gettysburg Address?'
+    >>> question1.correct_answer
+    'Abraham Lincoln'
+
+    >>> question2 = Question("What is the meaning of life?",42)
+    >>> question2.question
+    'What is the meaning of life?'
+    >>> question2.correct_answer
+    '42'
+
+    """
+
+    # Constructor method
+    def __init__(self, question, correct_answer):
+        self.question = question
+        self.correct_answer = str(correct_answer)
+
+
+class Exam(object):
+    """A class that creates an exam.
+
+    Takes one parameter:
+
+    name: a string representing the name of the exam
+
+    Exam also has a class attribute called questions, which you can use to store
+    a list of questions you want to ask your students.
+
+    >>> question1 = Question("Who gave the Gettysburg Address?", "Abraham Lincoln")
+    >>> question2 = Question("What is the meaning of life?",42)
+
+    >>> hard_quiz = Exam("Hardest Quiz Ever")
+    >>> hard_quiz.questions = [question1, question2]
+
+    >>> for question in hard_quiz.questions:
+    ...     print question.question
+    ...     print question.correct_answer
+    ...
+    ...
+    Who gave the Gettysburg Address?
+    Abraham Lincoln
+    What is the meaning of life?
+    42
+    """
+
+    # Constructor method.
+    def __init__(self, name):
+        self.name = name
+        self.questions = []
+
+    def add_question(self, question, correct_answer):
+        """Given a question and its answer, adds the question to the current exam.
+
+        Takes the following parameters:
+
+        question: a string of text
+        correct_answer: the answer to the given question; if given as a number, this
+                        will be converted to a string.
+        """
+
+        # Creates a new instance of the Question class
+        new_question = Question(question, correct_answer)
+
+        # Appends that Question to self.questions
+        self.questions.append(new_question)
+
+
+
+######################################################################
+if __name__ == "__main__":
+    print
+    import doctest
+    if doctest.testmod().failed == 0:
+        print "*** ALL TESTS PASSED ***"
+    print
