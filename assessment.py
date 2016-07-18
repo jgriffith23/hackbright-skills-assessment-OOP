@@ -83,7 +83,13 @@ class Student(object):
     def __init__(self, first_name, last_name, address):
         self.first_name = first_name
         self.last_name = last_name
+        self.full_name = first_name + " " + last_name
         self.address = address
+
+        # I made a slightly different design choice here. I think it would make
+        # sense to store scores on student instances as a dictionary, so you can
+        # look up the student's scores for multiple tests by test name.
+        self.scores = {}
 
 
 class Question(object):
@@ -98,7 +104,7 @@ class Question(object):
     >>> question1.question
     'Who gave the Gettysburg Address?'
     >>> question1.correct_answer
-    'Abraham Lincoln'
+    'abraham lincoln'
 
     >>> question2 = Question("What is the meaning of life?",42)
     >>> question2.question
@@ -111,7 +117,10 @@ class Question(object):
     # Constructor method
     def __init__(self, question, correct_answer):
         self.question = question
-        self.correct_answer = str(correct_answer)
+
+        # Use lower to allow for capitalization errors; if they spelled it right,
+        # they know it.
+        self.correct_answer = str(correct_answer).lower()
 
     def ask_and_evaluate(self):
         """Given a question, prints it and checks the student's response.
@@ -131,7 +140,8 @@ class Question(object):
         print self.question
         student_response = raw_input(" > ")
 
-        if student_response == self.correct_answer:
+        # Use .lower() to allow for capitalization errors.
+        if student_response.lower() == self.correct_answer:
             return True
         else:
             return False
@@ -159,7 +169,7 @@ class Exam(object):
     ...
     ...
     Who gave the Gettysburg Address?
-    Abraham Lincoln
+    abraham lincoln
     What is the meaning of life?
     42
     """
@@ -190,8 +200,7 @@ class Exam(object):
         the student's final score.
 
         Updates the student's score question-by-question, rathen than grading the
-        whole test at the end. Correct responses are worth 1 point. Incorrect
-        responses are worth -1 point.
+        whole test at the end. Correct responses are worth 1 point.
         """
 
         # Initialize score to 0, since the student hasn't sat the exam yet.
@@ -201,16 +210,104 @@ class Exam(object):
         for question in self.questions:
 
             # Get response and store the status of its correctness.
-            response_marked_correct = question.ask_and_evaluate()
+            response_correct = question.ask_and_evaluate()
 
-            # If the response was marked correct, increment score. Else,
-            # decrement it.
-            if response_marked_correct:
+            # If the response was marked correct, increment score.
+            if response_correct:
                 score = score + 1
-            else:
-                score = score - 1
 
         return score
+
+
+class Quiz(Exam):
+    """An exam that grades on a pass/fail basis.
+
+    If the student gets at least 50 percent of questions correct, they pass.
+    Otherwise, they fail.
+    """
+
+    # Override the administer() method from Exam to change the grading system
+    # for tests of type Quiz only.
+    def administer(self):
+
+        # Initialize score and question tracking variables to 0
+        score = 0
+        question_count = 0
+
+        # Iterate over the given list of questions.
+        for question in self.questions:
+
+            # Increment question count each time, since we don't know how
+            # many questions we'll have.
+            question_count = question_count + 1
+
+            # Check whether response was correct.
+            response_correct = question.ask_and_evaluate()
+
+            # If response was correct, increment score.
+            if response_correct:
+                score = score + 1
+
+        # Check the test score. If it's more than half the question count,
+        # tell the student they passed. Otherwise, they failed.
+        if score >= (question_count / 2.0):
+            return "Pass"
+        else:
+            return "Fail"
+
+
+def take_test(exam, student):
+    """ Given an exam and a student, administers the exam and gives the student
+    a score for that exam.
+    """
+
+    # Okay to overwrite old scores, since the only time the test would have the
+    # same name is if you were retaking it/updating based on a disputed score.
+    student.scores[exam.name] = exam.administer()
+
+
+def example():
+    """Uses the Student, Question, and Exam classes to create and administer a test.
+    """
+
+    # Create an exam
+    midterm = Exam("InfoSec 101 Midterm")
+
+    # Add some questions
+    midterm.add_question("What does SQL stand for?", "Structured Query Language")
+    midterm.add_question("What does XSS stand for?", "Cross-Site Scripting")
+    midterm.add_question("What does CSRF stand for?", "Cross-Site Request Forgery")
+    midterm.add_question("What does SSL stand for?", "Secure Sockets Layer")
+    midterm.add_question("Extra Credit: What is the NOP opcode in x86?", "0x90")
+
+    # Create a student
+    test_taker = Student("Alice", "Hacker", "42 Sirius Way")
+
+    print "Let's take the midterm!\n"
+
+    # Administer the test!
+    take_test(midterm, test_taker)
+
+    # Create a quiz
+    weekly_quiz = Quiz("H4X0R!NG 101 Quiz 2")
+    weekly_quiz.add_question("T/F: You can store shell code in an environment variable.",
+                             "T")
+    weekly_quiz.add_question("What's pushed onto the stack after the base pointer?",
+                             "Return address")
+    weekly_quiz.add_question("What is the Unix command for opening a shell?",
+                             "sh")
+    weekly_quiz.add_question("What command line tool can you use to debug C code?",
+                             "GDB")
+
+    print "\nLet's take the quiz!\n"
+
+    take_test(weekly_quiz, test_taker)
+
+    print "{}'s scores are:".format(test_taker.full_name), test_taker.scores
+
+example()
+
+
 
 ######################################################################
 if __name__ == "__main__":
